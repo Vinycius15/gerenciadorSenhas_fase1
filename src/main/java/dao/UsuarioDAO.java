@@ -97,5 +97,43 @@ public class UsuarioDAO {
                 ConexaoDB.fechar(conn, stmt, rs);
             }
             return usuario;
+
         }
+    //UODATE()
+    public boolean atualizarUsuario(Usuario usuario) {
+        // Atualiza apenas Nome e Login. A senha é atualizada em um método separado (mais seguro).
+        String sql = "UPDATE USUARIO SET nome = ?, login = ? WHERE id_usuario = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean sucesso = false;
+
+        try {
+            conn = ConexaoDB.getConexao();
+            stmt = conn.prepareStatement(sql);
+
+            // 1. Configura os novos valores
+            stmt.setString(1, usuario.getNome());
+            stmt.setString(2, usuario.getLogin());
+
+            // 2. Define a condição (WHERE)
+            stmt.setInt(3, usuario.getIdUsuario());
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            // SAÍDA ESPERADA no console
+            if (linhasAfetadas > 0) {
+                System.out.println("[SUCESSO] Dados do usuário ID [" + usuario.getIdUsuario() + "] atualizados.");
+                sucesso = true;
+            } else {
+                System.out.println("[INFO] Nenhum usuário encontrado com ID [" + usuario.getIdUsuario() + "] para atualizar.");
+            }
+
+        } catch (SQLException e) {
+            // Este erro pode ocorrer se o novo 'login' já existir (UNIQUE constraint)
+            System.err.println("[ERRO] Falha ao atualizar usuário: " + e.getMessage());
+        } finally {
+            ConexaoDB.fechar(conn, stmt); // Fecha os recursos sem ResultSet
+        }
+        return sucesso;
+    }
 }
