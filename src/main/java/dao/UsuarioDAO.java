@@ -10,12 +10,7 @@ import model.Usuario;
 import util.ConexaoDB;
 
 public class UsuarioDAO {
-
-    /**
-     * CADASTRO (CREATE) - Insere um novo usuário no banco de dados.
-     * @param usuario O objeto Usuario com os dados a serem salvos.
-     * @return O ID gerado para o novo usuário ou -1 em caso de falha.
-     */
+   //CREATE()
     public int cadastrarUsuario(Usuario usuario) {
         // O campo data_cadastro é preenchido automaticamente pelo DEFAULT CURRENT_DATE
         String sql = "INSERT INTO USUARIO (nome, login, senha_mestra_hash, salt) " +
@@ -58,7 +53,49 @@ public class UsuarioDAO {
         }
         return idGerado;
     }
+       //READ()
+        public Usuario buscarUsuarioPorLogin(String login) {
+            // Seleciona todos os campos, incluindo o hash e salt para autenticação
+            String sql = "SELECT id_usuario, nome, login, senha_mestra_hash, salt, data_cadastro " +
+                    "FROM USUARIO WHERE login = ?";
+            Usuario usuario = null;
+            Connection conn = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
 
-    // --- Outros métodos CRUD virão aqui (READ, UPDATE, DELETE) ---
+            try {
+                conn = ConexaoDB.getConexao();
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, login); // Define o parâmetro SQL
 
+                rs = stmt.executeQuery(); // Executa a consulta
+
+                // Se um resultado for encontrado:
+                if (rs.next()) {
+                    // Mapeia o resultado do banco para o objeto Usuario
+                    int id = rs.getInt("id_usuario");
+                    String nome = rs.getString("nome");
+                    String hash = rs.getString("senha_mestra_hash");
+                    String salt = rs.getString("salt");
+
+                    // Conversão de java.sql.Date para java.time.LocalDate
+                    LocalDate dataCadastro = rs.getDate("data_cadastro").toLocalDate();
+
+                    // Cria o objeto Usuario usando o construtor completo
+                    usuario = new Usuario(id, nome, login, hash, salt, dataCadastro);
+
+                    // SAÍDA ESPERADA no console (para fins de debug/teste em modo texto)
+                    System.out.println("[INFO] Usuário '" + login + "' encontrado com ID: " + id + ".");
+                } else {
+                    // SAÍDA ESPERADA se não for encontrado
+                    System.out.println("[INFO] Usuário com login '" + login + "' não encontrado.");
+                }
+
+            } catch (SQLException e) {
+                System.err.println("[ERRO] Falha ao buscar usuário: " + e.getMessage());
+            } finally {
+                ConexaoDB.fechar(conn, stmt, rs);
+            }
+            return usuario;
+        }
 }
