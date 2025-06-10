@@ -171,4 +171,34 @@ public class UsuarioDAO {
         return sucesso;
     }
 
+    /**
+     * Auxiliar: Busca apenas o SALT do usuário.
+     * @param idUsuario ID do usuário.
+     * @return O Salt como String.
+     * @throws Exception Se o usuário não for encontrado ou se houver erro no DB.
+     */
+    public String buscarSaltPorId(int idUsuario) throws SQLException {
+        String sql = "SELECT salt FROM USUARIO WHERE id_usuario = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String salt = null;
+
+        try {
+            conn = ConexaoDB.getConexao();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, idUsuario);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                salt = rs.getString("salt");
+            } else {
+                throw new SQLException("Usuário ID [" + idUsuario + "] não encontrado no DB.");
+            }
+        } finally {
+            ConexaoDB.fechar(conn, stmt, rs);
+        }
+        return salt;
+    }
+
 }
