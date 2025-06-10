@@ -8,6 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import model.Usuario;
 import util.ConexaoDB;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import util.ConexaoDB;
 
 public class UsuarioDAO {
    //CREATE()
@@ -136,4 +140,37 @@ public class UsuarioDAO {
         }
         return sucesso;
     }
+
+    //DELETE()
+    public boolean removerUsuario(int idUsuario) {
+        String sql = "DELETE FROM USUARIO WHERE id_usuario = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean sucesso = false;
+
+        try {
+            conn = ConexaoDB.getConexao();
+            stmt = conn.prepareStatement(sql);
+
+            // 1. Define o parâmetro (o ID a ser deletado)
+            stmt.setInt(1, idUsuario);
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            // SAÍDA ESPERADA no console
+            if (linhasAfetadas > 0) {
+                System.out.println("[SUCESSO] Usuário ID [" + idUsuario + "] removido com sucesso (e todos os seus itens).");
+                sucesso = true;
+            } else {
+                System.out.println("[INFO] Nenhum usuário encontrado com ID [" + idUsuario + "] para remover.");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("[ERRO] Falha ao remover usuário ID [" + idUsuario + "]: " + e.getMessage());
+        } finally {
+            ConexaoDB.fechar(conn, stmt); // Fecha os recursos sem ResultSet
+        }
+        return sucesso;
+    }
+
 }
