@@ -44,20 +44,20 @@ public class Main {
             exibirMenuPrincipal();
             opcao = lerOpcao();
 
-            // 1. Tratamento para as opções que SÓ podem ser usadas Deslogado/Logado:
+            // Lógica de Desbloqueio: A Opção 1 (CRUD de Usuários) é liberada.
             if (opcao == 1) {
-                // Opção 1 (Gerenciar Usuários) deve SEMPRE ser acessível para cadastro inicial
+                // Usuário pode gerenciar (e cadastrar) mesmo deslogado.
                 menuGerenciarUsuarios();
                 continue; // Volta ao topo do loop após o CRUD de Usuário
             }
 
-            // 2. Bloqueio para as opções do COFRE (2, 3, 4, 5) se o usuário não estiver logado
-            if (usuarioLogado == null && (opcao >= 2 && opcao <= 5)) {
-                System.out.println("\n🚨 Acesso negado ao COFRE. Faça o Login (opção 99) para continuar.");
+            // Bloqueio do Cofre: Se a opção for 2, 3, 4, 5 (Cofre) E o usuário não estiver logado.
+            if (usuarioLogado == null && opcao != 99 && opcao != 0) {
+                System.out.println("\n🚨 ACESSO NEGADO. Você deve fazer o Login (opção 99) para acessar o Cofre.");
                 continue;
             }
 
-            // 3. Execução das demais opções (99, 0, e as do cofre já logado)
+            // Execução das demais opções (Cofre logado, Login/Logout, Sair)
             switch (opcao) {
                 // Opção 1 foi tratada acima.
                 case 2: menuGerenciarCategorias(); break;
@@ -78,6 +78,7 @@ public class Main {
     // -----------------------------------------------------------------
 
     private static void exibirMenuPrincipal() {
+        System.out.println("viny@viny \n viny");
         String status = usuarioLogado != null ? ("LOGADO: " + usuarioLogado.getLogin()) : "DESLOGADO";
         System.out.println("\n--------------------------------------------------");
         System.out.println("        STATUS: " + status);
