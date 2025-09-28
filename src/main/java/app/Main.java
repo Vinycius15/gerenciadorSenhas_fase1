@@ -44,17 +44,22 @@ public class Main {
             exibirMenuPrincipal();
             opcao = lerOpcao();
 
-            // Lógica de autenticação: Opções que exigem login
-            if (usuarioLogado == null && opcao > 0 && opcao != 99) {
-                System.out.println("\n🚨 ATENÇÃO: Você precisa fazer o Login para acessar o cofre!");
-                if (!realizarLogin()) {
-                    continue;
-                }
+            // 1. Tratamento para as opções que SÓ podem ser usadas Deslogado/Logado:
+            if (opcao == 1) {
+                // Opção 1 (Gerenciar Usuários) deve SEMPRE ser acessível para cadastro inicial
+                menuGerenciarUsuarios();
+                continue; // Volta ao topo do loop após o CRUD de Usuário
             }
 
-            // Opções principais do sistema
+            // 2. Bloqueio para as opções do COFRE (2, 3, 4, 5) se o usuário não estiver logado
+            if (usuarioLogado == null && (opcao >= 2 && opcao <= 5)) {
+                System.out.println("\n🚨 Acesso negado ao COFRE. Faça o Login (opção 99) para continuar.");
+                continue;
+            }
+
+            // 3. Execução das demais opções (99, 0, e as do cofre já logado)
             switch (opcao) {
-                case 1: menuGerenciarUsuarios(); break;
+                // Opção 1 foi tratada acima.
                 case 2: menuGerenciarCategorias(); break;
                 case 3: menuGerenciarCredenciais(); break;
                 case 4: menuProcessosNegocio(); break;
