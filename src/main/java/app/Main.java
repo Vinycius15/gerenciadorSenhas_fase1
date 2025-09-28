@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+// Importações dos pacotes do projeto (Ajuste se necessário)
 import dao.CategoriaDAO;
 import dao.CredCategoriaDAO;
 import dao.ItemCredencialDAO;
@@ -24,26 +25,30 @@ public class Main {
     private static final CredCategoriaDAO credCategoriaDAO = new CredCategoriaDAO();
     private static final RelatorioDAO relatorioDAO = new RelatorioDAO();
 
-    // VARIÁVEIS DE SESSÃO (Para simular o usuário logado)
+    // VARIÁVEIS DE SESSÃO
     private static Usuario usuarioLogado = null;
-    private static String senhaMestraLogada = null; // A senha em texto PURO, necessária para cripto/descripto
+    private static String senhaMestraLogada = null;
 
+    // MÉTODOS MAIN CORRETO
     public static void main(String[] args) {
         int opcao;
 
+        // A linha problemática é substituída pela chamada completa System.out.println()
+        System.out.println(String.format("Hello and welcome to the Password Manager!"));
+
         System.out.println("==================================================");
-        System.out.println("        GERENCIADOR DE SENHAS - COFRE DIGITAL");
+        System.out.println("        INICIANDO GERENCIADOR DE SENHAS");
         System.out.println("==================================================");
 
         do {
             exibirMenuPrincipal();
             opcao = lerOpcao();
 
-            // Lógica de autenticação: Só permite acesso se houver um usuário logado
+            // Lógica de autenticação: Opções que exigem login
             if (usuarioLogado == null && opcao > 0 && opcao != 99) {
                 System.out.println("\n🚨 ATENÇÃO: Você precisa fazer o Login para acessar o cofre!");
                 if (!realizarLogin()) {
-                    continue; // Retorna ao menu se o login falhar
+                    continue;
                 }
             }
 
@@ -54,7 +59,7 @@ public class Main {
                 case 3: menuGerenciarCredenciais(); break;
                 case 4: menuProcessosNegocio(); break;
                 case 5: menuRelatorios(); break;
-                case 99: menuLoginESair(); break; // Opção Login/Logout
+                case 99: menuLoginESair(); break;
                 case 0: System.out.println("\nFechando o Gerenciador. Até logo!"); break;
                 default: System.out.println("Opção inválida. Tente novamente.");
             }
@@ -68,7 +73,7 @@ public class Main {
     // -----------------------------------------------------------------
 
     private static void exibirMenuPrincipal() {
-        String status = usuarioLogado != null ? ("USUÁRIO: " + usuarioLogado.getLogin()) : "NENHUM";
+        String status = usuarioLogado != null ? ("LOGADO: " + usuarioLogado.getLogin()) : "DESLOGADO";
         System.out.println("\n--------------------------------------------------");
         System.out.println("        STATUS: " + status);
         System.out.println("--------------------------------------------------");
@@ -100,18 +105,15 @@ public class Main {
         System.out.print("Senha Mestra: ");
         String senha = scanner.nextLine();
 
-        // 1. Busca o usuário no banco
         Usuario usuario = usuarioDAO.buscarUsuarioPorLogin(login);
 
         if (usuario != null) {
-            // 2. Gera o hash da senha fornecida com o salt do usuário
             String hashDigitado = CriptoUtil.gerarHashMestre(senha, usuario.getSalt());
 
-            // 3. Compara o hash gerado com o hash salvo no banco
             if (hashDigitado.equals(usuario.getSenhaMestraHash())) {
-                usuarioLogado = usuario; // Define a sessão
-                senhaMestraLogada = senha; // Guarda a senha (para descriptografia)
-                System.out.println("[SUCESSO] Login realizado com sucesso. Bem-vindo, " + usuario.getNome() + "!");
+                usuarioLogado = usuario;
+                senhaMestraLogada = senha;
+                System.out.println("[SUCESSO] Login realizado. Bem-vindo, " + usuario.getNome() + "!");
                 return true;
             }
         }
@@ -130,14 +132,14 @@ public class Main {
     }
 
     // -----------------------------------------------------------------
-    // --- 1. CRUD USUÁRIOS (Já implementado) ---
+    // --- 1. CRUD USUÁRIOS ---
     // -----------------------------------------------------------------
 
     private static void menuGerenciarUsuarios() {
         int opcao;
         do {
             System.out.println("\n--- CRUD DE USUÁRIOS ---");
-            System.out.println("[1] Cadastrar | [2] Buscar por Login | [3] Atualizar | [4] Remover | [9] Voltar");
+            System.out.println("[1] Cadastrar | [2] Buscar | [3] Atualizar | [4] Remover | [9] Voltar");
             System.out.print(">> Opção: ");
 
             opcao = lerOpcao();
@@ -181,11 +183,12 @@ public class Main {
             System.out.println("Nome: " + usuario.getNome());
             System.out.println("Login: " + usuario.getLogin());
             System.out.println("Data de Cadastro: " + usuario.getDataCadastro());
+        } else {
+            System.out.println("Usuário não encontrado.");
         }
     }
 
     private static void realizarAtualizacaoUsuario() {
-        // Implementação simplificada (reutilizando métodos)
         if (usuarioLogado == null) return;
 
         System.out.println("\n--- Atualizar Dados do Próprio Usuário ---");
@@ -198,24 +201,21 @@ public class Main {
         String novoLogin = scanner.nextLine();
         if (novoLogin.isEmpty()) novoLogin = usuarioLogado.getLogin();
 
-        // Cria objeto temporário para o update
         Usuario usuarioAtualizado = new Usuario(
                 usuarioLogado.getIdUsuario(),
                 novoNome,
                 novoLogin,
-                usuarioLogado.getSenhaMestraHash(), // Mantém o hash e salt
+                usuarioLogado.getSenhaMestraHash(),
                 usuarioLogado.getSalt(),
                 usuarioLogado.getDataCadastro()
         );
 
         if (usuarioDAO.atualizarUsuario(usuarioAtualizado)) {
-            // Atualiza a sessão após o sucesso no DB
             usuarioLogado = usuarioAtualizado;
         }
     }
 
     private static void realizarRemocaoUsuario() {
-        // Por segurança, só permite remover o próprio usuário (requer ID)
         if (usuarioLogado == null) return;
 
         System.out.println("\n--- Remoção de Conta ---");
@@ -225,7 +225,7 @@ public class Main {
         if (confirmacao.equalsIgnoreCase("SIM")) {
             if (usuarioDAO.removerUsuario(usuarioLogado.getIdUsuario())) {
                 System.out.println("Sua conta foi removida. O programa será fechado.");
-                System.exit(0); // Sai do programa após a remoção
+                System.exit(0);
             }
         } else {
             System.out.println("Remoção cancelada.");
@@ -332,13 +332,12 @@ public class Main {
         System.out.print("Dado Sensível (Senha, Número de Cartão, Conteúdo da Nota): ");
         String dadoPuro = scanner.nextLine();
 
-        // CRIAÇÃO DO OBJETO E CHAMADA DO DAO (A criptografia é feita no DAO)
         ItemCredencial novoItem = new ItemCredencial(
                 usuarioLogado.getIdUsuario(),
                 tipo,
                 titulo,
                 loginServico,
-                dadoPuro, // Passado em texto puro para o DAO
+                dadoPuro,
                 url
         );
 
@@ -360,10 +359,8 @@ public class Main {
             System.out.println("----------------------------------");
             System.out.println("ID: " + item.getIdItem() + " | Título: " + item.getTitulo() + " | Tipo: " + item.getTipo());
             System.out.println("Login: " + item.getLoginServico());
-            // Mostra o dado descriptografado!
-            System.out.println("Dado Secreto: " + item.getSenhaCriptografada());
+            System.out.println("Dado Secreto (Descriptografado): " + item.getSenhaCriptografada());
 
-            // Lista as associações de categorias para este item (Processo de Negócio)
             Map<Integer, String> cats = credCategoriaDAO.listarCategoriasPorItem(item.getIdItem());
             String listaCats = cats.isEmpty() ? "Nenhuma" : String.join(", ", cats.values());
             System.out.println("Categorias: " + listaCats);
@@ -389,16 +386,15 @@ public class Main {
         System.out.print("Novo Dado Secreto (Texto Puro): ");
         String novoDadoPuro = scanner.nextLine();
 
-        // Cria um objeto temporário para o update
         ItemCredencial itemAtualizado = new ItemCredencial(
                 id,
                 usuarioLogado.getIdUsuario(),
                 novoTipo,
                 novoTitulo,
                 novoLogin,
-                novoDadoPuro, // Passa o novo dado em texto puro para o DAO
+                novoDadoPuro,
                 novaUrl,
-                null // Data de modificação será atualizada pelo DB
+                null
         );
 
         itemCredencialDAO.atualizarItem(itemAtualizado, senhaMestraLogada);
@@ -513,7 +509,6 @@ public class Main {
     }
 
     private static void exibirRelatorioMultiplasCategorias() {
-        // Pedimos o mínimo de 2, pois 1 é a regra básica.
         Map<String, Integer> resultados = relatorioDAO.itensComMultiplasCategorias(2);
         System.out.println("\n==================================================");
         System.out.println("RELATÓRIO 3: ITENS COM MÚLTIPLAS CATEGORIAS (>= 2)");

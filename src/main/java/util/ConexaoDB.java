@@ -9,9 +9,9 @@ import java.sql.SQLException;
 public class ConexaoDB {
 
     // 🚨 ATUALIZE ESTES VALORES COM SUAS CREDENCIAIS DO POSTGRESQL 🚨
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/gerenciador_senhas_db";
+    private static final String DB_URL = "jdbc:postgresql://localhost:5432/gerenciador_senhas2_db";
     private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "SUA_SENHA_AQUI";
+    private static final String DB_PASSWORD = "123";
 
     /**
      * Tenta estabelecer a conexão com o banco de dados.
